@@ -28,14 +28,9 @@ func main() {
 	r.POST("/login", login)
 
 	// 列表帖子
-	r.GET("/api/posts", func(c *gin.Context) {
-		var posts []Post
-		DB.Order("created_at desc").Find(&posts)
-		c.JSON(200, posts)
-	})
+	r.GET("/api/posts", ListPosts)
 
 	// 需要鉴权的接口
-	// auth := r.Group("/api", AuthMiddleware())
 	auth := r.Group("/api")
 	auth.Use(AuthMiddleware())
 	{
@@ -48,27 +43,10 @@ func main() {
 			})
 		})
 
-		auth.POST("/posts", CreatePost)       // 发帖接口
-		auth.POST("/comments", CreateComment) // 评论接口
-
-		// 帖子详情
-		r.GET("/posts/:id", func(c *gin.Context) {
-			id := c.Param("id")
-			var post Post
-			if err := DB.First(&post, id).Error; err != nil {
-				c.JSON(404, gin.H{"error": "帖子未找到"})
-				return
-			}
-			c.JSON(200, post)
-		})
-
-		// 获取帖子评论
-		r.GET("/posts/:id/comments", func(c *gin.Context) {
-			id := c.Param("id")
-			var comments []Comment
-			DB.Where("post_id = ?", id).Order("created_at desc").Find(&comments)
-			c.JSON(200, comments)
-		})
+		auth.POST("/posts", CreatePost)                  // 发帖接口
+		auth.POST("/comments", CreateComment)            // 评论接口
+		auth.GET("/posts/:id", GetPost)                  // 帖子详情
+		auth.GET("/posts/:id/comments", GetPostComments) // 获取帖子评论
 	}
 
 	r.Run(":8082")
