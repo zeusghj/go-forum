@@ -10,7 +10,7 @@ import (
 var DB *gorm.DB
 
 func InitDB() {
-	// 修改成你自己的 MySQL 配置
+	// 修改成你自己的 MySQL 配置 用户名是 forum_user，密码是 123456 ,数据库是 go_forum
 	dsn := "forum_user:123456@tcp(127.0.0.1:3306)/go_forum?charset=utf8mb4&parseTime=True&loc=Local"
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
