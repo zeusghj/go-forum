@@ -28,6 +28,9 @@ func NewForumCommand() *cobra.Command {
 		SilenceUsage: true,
 		// 指定调用 cmd.Execute() 时，执行的 Run 函数，函数执行失败会返回错误信息
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// 如果 `--version=true`，则打印版本并退出
+			verflag.PrintAndExitIfRequested()
+
 			// 初始化日志
 			log.Init(logOptions())
 			defer log.Sync() //Sync 将缓存中的日志刷新到磁盘文件中

@@ -9,7 +9,6 @@ require (
 	github.com/gosuri/uitable v0.0.4
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
-	github.com/zeusghj/scaffold v0.0.0-20241220094956-7b28cf3fdf00
 	go.uber.org/automaxprocs v1.6.0
 	go.uber.org/zap v1.27.0
 	gorm.io/driver/mysql v1.6.0
