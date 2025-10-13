@@ -22,3 +22,7 @@ log:
   level: debug
   format: console
   output-paths: [/tmp/forum.log, stdout] # 标准流​：如 "stdout"、"stderr" 在终端输出
+
+# 多语言配置
+language:
+  local: "zh-cn"
