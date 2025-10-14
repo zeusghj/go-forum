@@ -6,7 +6,6 @@ import (
 	"go-forum/internal/pkg/log"
 	v1 "go-forum/pkg/api/forum/v1"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,12 +15,6 @@ func (ctrl *UserController) Create(c *gin.Context) {
 
 	var r v1.CreateUserRequest
 	if err := c.ShouldBindJSON(&r); err != nil {
-		core.WriteResponse(c, errno.ErrBind, nil)
-
-		return
-	}
-
-	if _, err := govalidator.ValidateStruct(r); err != nil {
 		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
 
 		return
@@ -33,5 +26,5 @@ func (ctrl *UserController) Create(c *gin.Context) {
 		return
 	}
 
-	core.WriteResponse(c, nil, nil)
+	core.WriteResponse(c, nil, gin.H{"message": "用户创建成功"})
 }

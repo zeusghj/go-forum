@@ -2,11 +2,11 @@ package v1
 
 // CreateUserRequest 指定了 `POST /v1/user/register` 接口的请求参数.
 type CreateUserRequest struct {
-	Username string `json:"username" valid:"alphanum,required,stringlength(1|255)"`
-	Password string `json:"password" valid:"required,stringlength(6|18)"`
-	Nickname string `json:"nickname" valid:"stringlength(1|255)"`
-	Email    string `json:"email" valid:"email"`
-	Phone    string `json:"phone" valid:"stringlength(11|11)"`
+	Username string `json:"username" binding:"required,alphanum,min=1,max=255"`
+	Password string `json:"password" binding:"required,min=6,max=18"`
+	Nickname string `json:"nickname" binding:"omitempty,max=30"`
+	Email    string `json:"email" binding:"omitempty,email"`
+	Phone    string `json:"phone" binding:"omitempty,len=11"`
 }
 
 // GetUserResponse 指定了 `GET /v1/user/user-info` 接口的返回参数.
