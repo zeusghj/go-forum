@@ -29,11 +29,14 @@ func installRouters(g *gin.Engine) error {
 	// 创建 v1 路由分组
 	v1 := g.Group("/v1")
 	{
+		// 注册
+		v1.POST("/register", uc.Register)
+		// 登录
 		// 创建 users 路由分组
-		userv1 := v1.Group("/users")
-		{
-			userv1.POST("", uc.Create)
-		}
+		// userv1 := v1.Group("/user")
+		// {
+		// 	userv1.POST("", uc.Create)
+		// }
 	}
 
 	return nil

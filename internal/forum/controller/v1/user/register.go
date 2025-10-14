@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Create 创建一个新的用户
-func (ctrl *UserController) Create(c *gin.Context) {
-	log.C(c).Infow("Create user function called")
+// Register 创建一个新的用户
+func (ctrl *UserController) Register(c *gin.Context) {
+	log.C(c).Infow("register function called")
 
 	var r v1.CreateUserRequest
 	if err := c.ShouldBindJSON(&r); err != nil {
@@ -26,5 +26,5 @@ func (ctrl *UserController) Create(c *gin.Context) {
 		return
 	}
 
-	core.WriteResponse(c, nil, gin.H{"message": "用户创建成功"})
+	core.WriteResponse(c, nil, gin.H{"message": "注册成功"})
 }
