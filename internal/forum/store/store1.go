@@ -1,6 +1,7 @@
-package main
+package store
 
 import (
+	"go-forum/internal/pkg/model"
 	"log"
 
 	"gorm.io/driver/mysql"
@@ -19,5 +20,5 @@ func InitDB() {
 	}
 
 	// 自动建表
-	DB.AutoMigrate(&User{})
+	DB.AutoMigrate(&model.UserM{}, &model.PostM{}, &model.CommentM{})
 }
