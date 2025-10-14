@@ -1,6 +1,10 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"go-forum/pkg/auth"
+
+	"gorm.io/gorm"
+)
 
 type UserM struct {
 	gorm.Model
@@ -13,4 +17,15 @@ type UserM struct {
 
 func (u *UserM) TableName() string {
 	return "users"
+}
+
+// BeforeCreate 在创建数据库记录之前加密明文密码.
+func (u *UserM) BeforeCreate(tx *gorm.DB) (err error) {
+	// Encrypt the user password.
+	u.Password, err = auth.Encrypt(u.Password)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
