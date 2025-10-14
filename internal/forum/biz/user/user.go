@@ -61,6 +61,8 @@ func (u *userBiz) Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginRespo
 		return nil, errno.ErrPasswordIncorrect
 	}
 
+	// 签 JWT
+
 	// 如果匹配成功，说明登录成功， 签发 token 并返回
 	return &v1.LoginResponse{Token: ""}, nil
 }
