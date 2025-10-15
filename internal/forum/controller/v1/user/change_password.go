@@ -14,15 +14,7 @@ import (
 func (ctrl *UserController) ChangePassword(c *gin.Context) {
 	log.C(c).Infow("ChangePassword function called")
 
-	userId := c.Value(known.XUsernameKey)
-	username, ok := userId.(string)
-
-	if !ok || username == "" {
-		// 当前登录的用户有问题
-		core.WriteResponse(c, errno.ErrTokenInvalid, nil)
-
-		return
-	}
+	userID := c.Value(known.XUserIDKey).(uint)
 
 	var r v1.ChangePasswordRequest
 	if err := c.ShouldBindJSON(&r); err != nil {
@@ -31,7 +23,7 @@ func (ctrl *UserController) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	if err := ctrl.b.Users().ChangePassword(c, username, &r); err != nil {
+	if err := ctrl.b.Users().ChangePassword(c, userID, &r); err != nil {
 		core.WriteResponse(c, err, nil)
 
 		return

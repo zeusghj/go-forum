@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"regexp"
 
 	"go-forum/internal/forum/store"
@@ -12,13 +13,15 @@ import (
 	"go-forum/pkg/token"
 
 	"github.com/jinzhu/copier"
+	"gorm.io/gorm"
 )
 
 // UserBiz 定义了 user 模块在 biz 层所实现的方法.
 type UserBiz interface {
 	Create(ctx context.Context, r *v1.CreateUserRequest) error
 	Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginResponse, error)
-	ChangePassword(ctx context.Context, username string, r *v1.ChangePasswordRequest) error
+	GetUser(ctx context.Context, userID uint) (*v1.GetUserResponse, error)
+	ChangePassword(ctx context.Context, userId uint, r *v1.ChangePasswordRequest) error
 }
 
 // UserBiz 接口的实现.
@@ -53,7 +56,7 @@ func (b *userBiz) Create(ctx context.Context, r *v1.CreateUserRequest) error {
 // Login 是 UserBiz 接口中 `Login` 方法的实现.
 func (u *userBiz) Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginResponse, error) {
 	// 获取登录用户的所有信息
-	user, err := u.ds.Users().Get(ctx, r.Username)
+	user, err := u.ds.Users().GetByUsername(ctx, r.Username)
 	if err != nil {
 		return nil, errno.ErrUserNotFound
 	}
@@ -64,7 +67,7 @@ func (u *userBiz) Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginRespo
 	}
 
 	// 如果匹配成功，说明登录成功，签发 token 并返回
-	t, err := token.Sign(r.Username)
+	t, err := token.Sign(user.ID, user.Username)
 	if err != nil {
 		return nil, errno.ErrSignToken
 	}
@@ -74,8 +77,8 @@ func (u *userBiz) Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginRespo
 }
 
 // ChangePassword 是 UserBiz 接口中 `ChangePassword` 方法的实现.
-func (u *userBiz) ChangePassword(ctx context.Context, username string, r *v1.ChangePasswordRequest) error {
-	user, err := u.ds.Users().Get(ctx, username)
+func (u *userBiz) ChangePassword(ctx context.Context, userID uint, r *v1.ChangePasswordRequest) error {
+	user, err := u.ds.Users().GetByID(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -90,4 +93,20 @@ func (u *userBiz) ChangePassword(ctx context.Context, username string, r *v1.Cha
 	}
 
 	return nil
+}
+
+// 获取用户详情
+func (u *userBiz) GetUser(ctx context.Context, userID uint) (*v1.GetUserResponse, error) {
+	user, err := u.ds.Users().GetByID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errno.ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	var resp v1.GetUserResponse
+	_ = copier.CopyWithOption(&resp, user, copier.Option{IgnoreEmpty: true, DeepCopy: true})
+
+	return &resp, nil
 }

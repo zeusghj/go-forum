@@ -10,6 +10,7 @@ const (
 	// EnUS 英文 - 美国
 	EnUS = "en-us"
 
-	// XUsernameKey 用来定义 Gin 上下文的键，代表请求的所有者.
+	// XUserIDKey XUsernameKey 用来定义 Gin 上下文的键，代表请求的所有者.
+	XUserIDKey   = "X-UserID"
 	XUsernameKey = "X-Username"
 )

@@ -14,15 +14,16 @@ import (
 func Authn() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 解析 JWT Token 先获取token再从token取出username
-		username, err := token.ParseRequest(ctx)
+		userID, username, err := token.ParseRequest(ctx)
 
-		if err != nil {
+		if err != nil || userID == 0 {
 			core.WriteResponse(ctx, errno.ErrTokenInvalid, nil)
 			ctx.Abort()
 
 			return
 		}
 
+		ctx.Set(known.XUserIDKey, userID)
 		ctx.Set(known.XUsernameKey, username)
 		ctx.Next()
 	}

@@ -39,8 +39,11 @@ func installRouters(g *gin.Engine) error {
 		// 创建 users 路由分组
 		userv1 := v1.Group("/user", mw.Authn())
 		{
+			userv1.GET("", uc.GetUser)                         // 获取指定用户名的用户详情
+			userv1.GET("/profile", uc.GetUser)                 // 个人详情
 			userv1.POST("/change-password", uc.ChangePassword) // 修改密码
 		}
+
 	}
 
 	return nil

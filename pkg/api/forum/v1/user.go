@@ -1,5 +1,7 @@
 package v1
 
+import "time"
+
 // LoginRequest 指定了 `POST /login` 接口的请求参数
 type LoginRequest struct {
 	Username string `json:"username" binding:"required,alphanum,min=1,max=255"`
@@ -31,11 +33,12 @@ type GetUserResponse UserInfo
 
 // UserInfo 指定了用户的详细信息.
 type UserInfo struct {
-	Username  string `json:"username"`
-	Nickname  string `json:"nickname"`
-	Email     string `json:"email"`
-	Phone     string `json:"phone"`
-	PostCount int64  `json:"postCount"`
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
+	ID        uint      `json:"id"`
+	Username  string    `json:"username"`
+	Nickname  string    `json:"nickname"`
+	Email     string    `json:"email"`
+	Phone     string    `json:"phone"`
+	PostCount int64     `json:"postCount"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
