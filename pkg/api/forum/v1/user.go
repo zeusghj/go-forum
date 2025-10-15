@@ -11,6 +11,12 @@ type LoginResponse struct {
 	Token string `json:"token"`
 }
 
+// ChangePasswordRequest 指定了 `POST /v1/user/change-password` 接口的请求参数.
+type ChangePasswordRequest struct {
+	OldPassword string `json:"oldPassword" binding:"required,min=6,max=18"`
+	NewPassword string `json:"newPassword" binding:"required,min=6,max=18"`
+}
+
 // CreateUserRequest 指定了 `POST /register` 接口的请求参数.
 type CreateUserRequest struct {
 	Username string `json:"username" binding:"required,alphanum,min=1,max=255"`

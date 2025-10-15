@@ -10,7 +10,7 @@ import (
 )
 
 // 登录 forum 并返回一个 JWT Token.
-func (ctr *UserController) Login(c *gin.Context) {
+func (ctrl *UserController) Login(c *gin.Context) {
 	log.C(c).Infow("Login function called")
 
 	var r v1.LoginRequest
@@ -19,4 +19,13 @@ func (ctr *UserController) Login(c *gin.Context) {
 
 		return
 	}
+
+	resp, err := ctrl.b.Users().Login(c, &r)
+	if err != nil {
+		core.WriteResponse(c, err, nil)
+
+		return
+	}
+
+	core.WriteResponse(c, nil, resp)
 }

@@ -9,6 +9,7 @@ import (
 	"go-forum/internal/pkg/model"
 	v1 "go-forum/pkg/api/forum/v1"
 	"go-forum/pkg/auth"
+	"go-forum/pkg/token"
 
 	"github.com/jinzhu/copier"
 )
@@ -17,6 +18,7 @@ import (
 type UserBiz interface {
 	Create(ctx context.Context, r *v1.CreateUserRequest) error
 	Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginResponse, error)
+	ChangePassword(ctx context.Context, username string, r *v1.ChangePasswordRequest) error
 }
 
 // UserBiz 接口的实现.
@@ -61,8 +63,31 @@ func (u *userBiz) Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginRespo
 		return nil, errno.ErrPasswordIncorrect
 	}
 
-	// 签 JWT
+	// 如果匹配成功，说明登录成功，签发 token 并返回
+	t, err := token.Sign(r.Username)
+	if err != nil {
+		return nil, errno.ErrSignToken
+	}
 
 	// 如果匹配成功，说明登录成功， 签发 token 并返回
-	return &v1.LoginResponse{Token: ""}, nil
+	return &v1.LoginResponse{Token: t}, nil
+}
+
+// ChangePassword 是 UserBiz 接口中 `ChangePassword` 方法的实现.
+func (u *userBiz) ChangePassword(ctx context.Context, username string, r *v1.ChangePasswordRequest) error {
+	user, err := u.ds.Users().Get(ctx, username)
+	if err != nil {
+		return err
+	}
+
+	if err := auth.Compare(user.Password, r.OldPassword); err != nil {
+		return errno.ErrPasswordIncorrect
+	}
+
+	user.Password, _ = auth.Encrypt(r.NewPassword)
+	if err := u.ds.Users().Update(ctx, user); err != nil {
+		return err
+	}
+
+	return nil
 }

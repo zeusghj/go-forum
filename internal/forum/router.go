@@ -7,6 +7,8 @@ import (
 	"go-forum/internal/pkg/errno"
 	"go-forum/internal/pkg/log"
 
+	mw "go-forum/internal/pkg/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,14 +34,13 @@ func installRouters(g *gin.Engine) error {
 	g.POST("/login", uc.Login)
 
 	// 创建 v1 路由分组
-	// v1 := g.Group("/v1")
+	v1 := g.Group("/v1")
 	{
-
 		// 创建 users 路由分组
-		// userv1 := v1.Group("/user")
-		// {
-		// 	userv1.POST("", uc.Create)
-		// }
+		userv1 := v1.Group("/user", mw.Authn())
+		{
+			userv1.POST("/change-password", uc.ChangePassword) // 修改密码
+		}
 	}
 
 	return nil
