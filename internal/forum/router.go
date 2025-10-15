@@ -26,12 +26,15 @@ func installRouters(g *gin.Engine) error {
 
 	uc := user.New(store.S)
 
+	// 注册
+	g.POST("/register", uc.Register)
+	// 登录
+	g.POST("/login", uc.Login)
+
 	// 创建 v1 路由分组
-	v1 := g.Group("/v1")
+	// v1 := g.Group("/v1")
 	{
-		// 注册
-		v1.POST("/register", uc.Register)
-		// 登录
+
 		// 创建 users 路由分组
 		// userv1 := v1.Group("/user")
 		// {

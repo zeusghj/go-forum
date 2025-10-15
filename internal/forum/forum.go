@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go-forum/internal/pkg/known"
 	"go-forum/internal/pkg/log"
 	mw "go-forum/internal/pkg/middleware"
+	"go-forum/pkg/token"
 	"go-forum/pkg/version/verflag"
 	"net/http"
 	"os"
@@ -82,6 +84,9 @@ func run() error {
 	if err := initStore(); err != nil {
 		return err
 	}
+
+	// 设置 token 包的签发密钥，用于 token 包 token 的签发和解析
+	token.Init(viper.GetString("jwt-secret"), known.XUsernameKey)
 
 	// 设置 Gin 模式
 	gin.SetMode(viper.GetString("runmode"))
