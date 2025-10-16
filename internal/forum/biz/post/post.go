@@ -16,7 +16,7 @@ import (
 // PostBiz 定义了 post 模块在 biz 层所实现的方法
 type PostBiz interface {
 	Create(ctx context.Context, userID uint, r *v1.CreatePostRequest) error
-	Get(ctx context.Context, postID string) (*v1.GetPostResponse, error)
+	Get(ctx context.Context, postID uint) (*v1.GetPostResponse, error)
 	List(ctx context.Context, offset, limit int) (*v1.ListPostResponse, error)
 }
 
@@ -48,7 +48,7 @@ func (b *postBiz) Create(ctx context.Context, userID uint, r *v1.CreatePostReque
 }
 
 // Get implements PostBiz.
-func (p *postBiz) Get(ctx context.Context, postID string) (*v1.GetPostResponse, error) {
+func (p *postBiz) Get(ctx context.Context, postID uint) (*v1.GetPostResponse, error) {
 	postM, err := p.ds.Posts().Get(ctx, postID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

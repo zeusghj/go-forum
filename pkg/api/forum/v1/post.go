@@ -12,6 +12,10 @@ type PostInfo struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// type GetPostRequest struct {
+// 	postID uint `form:"post_id" binding:"omitempty"`
+// }
+
 // GetPostResponse 指定了 `GET /v1/post/detail` 接口的返回参数.
 type GetPostResponse PostInfo
 
