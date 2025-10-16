@@ -18,6 +18,8 @@ type PostBiz interface {
 	Create(ctx context.Context, userID uint, r *v1.CreatePostRequest) error
 	Get(ctx context.Context, postID uint) (*v1.GetPostResponse, error)
 	List(ctx context.Context, offset, limit int) (*v1.ListPostResponse, error)
+	AddComment(ctx context.Context, userID uint, r *v1.CreateCommentRequest) error
+	CommentList(ctx context.Context, postID uint) (*v1.ListCommentResponse, error)
 }
 
 // PostBiz 接口的实现
@@ -86,4 +88,42 @@ func (b *postBiz) List(ctx context.Context, offset, limit int) (*v1.ListPostResp
 	}
 
 	return &v1.ListPostResponse{TotalCount: count, Posts: posts}, nil
+}
+
+// AddComment 是 PostBiz 接口中 `AddComment` 方法的实现.
+func (b *postBiz) AddComment(ctx context.Context, userID uint, r *v1.CreateCommentRequest) error {
+	var commentM model.CommentM
+	_ = copier.Copy(&commentM, r)
+
+	commentM.UserID = userID
+
+	if err := b.ds.Posts().AddComment(ctx, &commentM); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (b *postBiz) CommentList(ctx context.Context, postID uint) (*v1.ListCommentResponse, error) {
+	count, list, err := b.ds.Posts().CommentList(ctx, postID)
+	if err != nil {
+		log.C(ctx).Errorw("Failed to list comments from storage", "err", err)
+		return nil, err
+	}
+
+	comments := make([]*v1.CommentInfo, 0, len(list))
+	for _, item := range list {
+		comment := item
+		comments = append(comments, &v1.CommentInfo{
+			ID:        comment.ID,
+			PostID:    postID,
+			UserID:    comment.UserID,
+			Username:  "还未实现",
+			Content:   comment.Content,
+			CreatedAt: comment.CreatedAt,
+			UpdatedAt: comment.UpdatedAt,
+		})
+	}
+
+	return &v1.ListCommentResponse{TotalCount: count, Posts: comments}, nil
 }

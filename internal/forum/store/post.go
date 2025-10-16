@@ -12,7 +12,8 @@ type PostStore interface {
 	Create(ctx context.Context, post *model.PostM) error
 	Get(ctx context.Context, postID uint) (*model.PostM, error)
 	List(ctx context.Context, offset, limit int) (int64, []*model.PostM, error)
-	// AddComment(ctx context.Context, postID )
+	AddComment(ctx context.Context, comment *model.CommentM) error
+	CommentList(ctx context.Context, postID uint) (int64, []*model.CommentM, error)
 }
 
 // PostStore 接口的实现
@@ -48,6 +49,21 @@ func (p *posts) List(ctx context.Context, offset, limit int) (count int64, ret [
 		Find(&ret).
 		Offset(-1).
 		Limit(-1).
+		Count(&count).
+		Error
+
+	return
+}
+
+// AddComment 对postID 添加一条评论
+func (p *posts) AddComment(ctx context.Context, comment *model.CommentM) error {
+	return p.db.Create(&comment).Error
+}
+
+// CommentList  返回 comment 列表.
+func (p *posts) CommentList(ctx context.Context, postID uint) (count int64, ret []*model.CommentM, err error) {
+	err = p.db.Where("post_id = ?", postID).Order("id desc").
+		Find(&ret).
 		Count(&count).
 		Error
 

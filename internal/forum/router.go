@@ -55,8 +55,8 @@ func installRouters(g *gin.Engine) error {
 			// 创建 comment 路由分组
 			comment := postv1.Group("/comment")
 			{
-				comment.POST("/add", nil) // 添加评论
-				comment.GET("/list", nil) // 评论列表
+				comment.POST("/add", pc.AddComment)  // 添加评论
+				comment.GET("/list", pc.CommentList) // 评论列表
 			}
 		}
 
