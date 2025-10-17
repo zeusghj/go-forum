@@ -14,10 +14,10 @@ func (ctrl *PostController) Get(c *gin.Context) {
 	log.C(c).Infow("Get post function called.")
 
 	// 从url获取参数 postID
-	postIDStr := c.Query("post_id")
+	postIDStr := c.Query("id")
 
 	if postIDStr == "" {
-		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage("未填写post_id"), nil)
+		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage("未填写post id"), nil)
 		return
 	}
 
@@ -25,7 +25,7 @@ func (ctrl *PostController) Get(c *gin.Context) {
 	postID, err := strconv.ParseUint(postIDStr, 10, 64)
 	if err != nil {
 		// 这里可以更精细地处理错误类型
-		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage("post_id 必须是一个非负整数"), nil)
+		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage("post id 必须是一个非负整数"), nil)
 		return
 	}
 

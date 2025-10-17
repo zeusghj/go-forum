@@ -20,8 +20,6 @@ func (ctrl *PostController) List(c *gin.Context) {
 		return
 	}
 
-	log.Infow("参数值： ", "offset", r.Offset, "limit", r.Limit)
-
 	resp, err := ctrl.b.Posts().List(c, r.Offset, r.Limit)
 	if err != nil {
 		core.WriteResponse(c, err, nil)

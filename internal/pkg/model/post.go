@@ -9,6 +9,12 @@ type PostM struct {
 	Content string `gorm:"not null"`
 }
 
+// CommentCountResult 每个帖子的评论数量
+type CommentCountResult struct {
+	PostID uint  `gorm:"column:post_id"`
+	Count  int64 `gorm:"column:count"`
+}
+
 func (p *PostM) TableName() string {
 	return "posts"
 }

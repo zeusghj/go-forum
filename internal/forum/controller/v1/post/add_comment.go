@@ -14,7 +14,18 @@ import (
 func (ctrl *PostController) AddComment(c *gin.Context) {
 	log.C(c).Infow("Comment-Add function called")
 
-	userID := c.Value(known.XUserIDKey).(uint)
+	// 从上下文获取 user_id （JWT中间件存的）
+	userIDValue, exists := c.Get(known.XUserIDKey)
+	if !exists {
+		core.WriteResponse(c, errno.ErrTokenInvalid, nil)
+		return
+	}
+
+	userID, ok := userIDValue.(uint)
+	if !ok {
+		core.WriteResponse(c, errno.ErrTokenInvalid.SetMessage("用户ID解析失败"), nil)
+		return
+	}
 
 	var r v1.CreateCommentRequest
 	if err := c.ShouldBindJSON(&r); err != nil {
@@ -29,5 +40,5 @@ func (ctrl *PostController) AddComment(c *gin.Context) {
 		return
 	}
 
-	core.WriteResponse(c, nil, gin.H{"code": 200, "data": "成功"})
+	core.WriteResponse(c, nil, gin.H{"code": 200, "data": "评论成功"})
 }

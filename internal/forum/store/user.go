@@ -13,6 +13,7 @@ type UserStore interface {
 	GetByID(ctx context.Context, userID uint) (*model.UserM, error)
 	GetByUsername(ctx context.Context, username string) (*model.UserM, error)
 	Update(ctx context.Context, user *model.UserM) error
+	GetUsers(ctx context.Context, userIDs []uint) ([]*model.UserM, error)
 }
 
 // UserStore 接口的实现.
@@ -50,6 +51,14 @@ func (u *users) GetByUsername(ctx context.Context, username string) (*model.User
 	}
 
 	return &user, nil
+}
+
+// 批量查用户信息 参数 userIDs
+func (u *users) GetUsers(ctx context.Context, userIDs []uint) (ret []*model.UserM, err error) {
+
+	err = u.db.Where("id IN ?", userIDs).Find(&ret).Error
+
+	return
 }
 
 // Update 更新一条 user 数据库记录.

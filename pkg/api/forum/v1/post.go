@@ -4,12 +4,14 @@ import "time"
 
 // PostInfo 指定了博客的详细信息.
 type PostInfo struct {
-	Username  string    `json:"username,omitempty"`
-	ID        uint      `json:"id"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID           uint      `json:"id"`
+	Title        string    `json:"title"`
+	Content      string    `json:"content"`
+	UserID       uint      `json:"userID"`
+	Username     string    `json:"username,omitempty"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
+	CommentCount int64     `json:"commentCount"`
 }
 
 // type GetPostRequest struct {
@@ -58,8 +60,8 @@ type ListCommentResponse struct {
 // CommentInfo 指定了评论的详细信息.
 type CommentInfo struct {
 	ID        uint      `json:"id"`
-	PostID    uint      `json:"post_id"`
-	UserID    uint      `json:"user_id"`
+	PostID    uint      `json:"postID"`
+	UserID    uint      `json:"userID"`
 	Username  string    `json:"username,omitempty"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"createdAt"`

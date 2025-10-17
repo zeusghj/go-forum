@@ -60,8 +60,29 @@ func (p *postBiz) Get(ctx context.Context, postID uint) (*v1.GetPostResponse, er
 		return nil, err
 	}
 
-	var postR v1.GetPostResponse
-	_ = copier.Copy(&postR, postM)
+	// 查询作者名称 (可选)
+	authorName := ""
+	user, err := p.ds.Users().GetByID(ctx, postM.UserID)
+	if err == nil {
+		authorName = user.Username
+	}
+
+	// 查询评论数
+	commentCount, err := p.ds.Posts().CommentCount(ctx, postM.ID)
+	if err != nil {
+		log.Errorw("查询帖子的评论数失败", "postID", postM.ID)
+		commentCount = 0
+	}
+
+	var postR = v1.GetPostResponse{
+		ID:           postM.ID,
+		Title:        postM.Title,
+		Content:      postM.Content,
+		UserID:       postM.UserID,
+		Username:     authorName, // 若为空，前端可处理显示“匿名”或 id
+		CreatedAt:    postM.CreatedAt,
+		CommentCount: commentCount,
+	}
 
 	return &postR, nil
 }
@@ -74,16 +95,56 @@ func (b *postBiz) List(ctx context.Context, offset, limit int) (*v1.ListPostResp
 		return nil, err
 	}
 
+	// 收集 post ids 和 user ids
+	postIDs := make([]uint, 0, len(list))
+	userIDSet := make(map[uint]struct{})
+	userIDs := make([]uint, 0, len(list))
+	for _, p := range list {
+		postIDs = append(postIDs, p.ID)
+		if _, ok := userIDSet[p.UserID]; !ok {
+			userIDSet[p.UserID] = struct{}{}
+			userIDs = append(userIDs, p.UserID)
+		}
+	}
+
+	// 查询用户信息 （批量）
+	userMap := map[uint]string{}
+	if len(userIDs) > 0 {
+		users, err := b.ds.Users().GetUsers(ctx, userIDs)
+		if err != nil {
+			log.Errorw("批量查询用户信息出错")
+			return nil, err
+		}
+		for _, u := range users {
+			userMap[u.ID] = u.Username
+		}
+	}
+
+	// 查询每个帖子的评论数量
+	commentCountMap := map[uint]int64{}
+	if len(postIDs) > 0 {
+		list, err := b.ds.Posts().CommentCounts(ctx, postIDs)
+		if err != nil {
+			log.Errorw("查询每个帖子的评论数量出错")
+			return nil, err
+		}
+		for _, ct := range list {
+			commentCountMap[ct.PostID] = ct.Count
+		}
+	}
+
+	// 构造响应
+
 	posts := make([]*v1.PostInfo, 0, len(list))
-	for _, item := range list {
-		post := item
+	for _, p := range list {
 		posts = append(posts, &v1.PostInfo{
-			Username:  "还未实现",
-			ID:        post.ID,
-			Title:     post.Title,
-			Content:   post.Content,
-			CreatedAt: post.CreatedAt,
-			UpdatedAt: post.UpdatedAt,
+			ID:           p.ID,
+			Title:        p.Title,
+			Content:      p.Content,
+			UserID:       p.UserID,
+			Username:     userMap[p.UserID], // 若为空，前端可处理显示“匿名”或 id
+			CreatedAt:    p.CreatedAt,
+			CommentCount: commentCountMap[p.ID],
 		})
 	}
 
@@ -111,17 +172,39 @@ func (b *postBiz) CommentList(ctx context.Context, postID uint) (*v1.ListComment
 		return nil, err
 	}
 
+	// 收集评论用户的 user ids
+	userIDSet := map[uint]struct{}{}
+	userIDs := make([]uint, 0, len(list))
+	for _, cm := range list {
+		if _, ok := userIDSet[cm.UserID]; !ok {
+			userIDSet[cm.UserID] = struct{}{}
+			userIDs = append(userIDs, cm.UserID)
+		}
+	}
+
+	// 批量查询评论用户的用户名
+	userMap := map[uint]string{}
+	if len(userIDs) > 0 {
+		users, err := b.ds.Users().GetUsers(ctx, userIDs)
+		if err != nil {
+			log.Errorw("批量查询用户信息出错")
+			return nil, err
+		}
+		for _, u := range users {
+			userMap[u.ID] = u.Username
+		}
+	}
+
 	comments := make([]*v1.CommentInfo, 0, len(list))
-	for _, item := range list {
-		comment := item
+	for _, cm := range list {
 		comments = append(comments, &v1.CommentInfo{
-			ID:        comment.ID,
-			PostID:    postID,
-			UserID:    comment.UserID,
-			Username:  "还未实现",
-			Content:   comment.Content,
-			CreatedAt: comment.CreatedAt,
-			UpdatedAt: comment.UpdatedAt,
+			ID:        cm.ID,
+			PostID:    cm.PostID,
+			UserID:    cm.UserID,
+			Username:  userMap[cm.UserID],
+			Content:   cm.Content,
+			CreatedAt: cm.CreatedAt,
+			UpdatedAt: cm.UpdatedAt,
 		})
 	}
 
