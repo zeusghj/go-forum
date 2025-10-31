@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"go-forum/internal/pkg/known"
+	"go-forum/internal/pkg/model"
 	"sync"
 	"time"
 
@@ -177,14 +178,22 @@ func (l *zapLogger) C(ctx context.Context) *zapLogger {
 	if requestID := ctx.Value(known.XRequestIDKey); requestID != nil {
 		lc.z = lc.z.With(zap.Any(known.XRequestIDKey, requestID))
 	}
+	v := ctx.Value("user")
+	if v != nil {
+		user := v.(model.UserM)
 
-	if userID := ctx.Value(known.XUserIDKey); userID != nil {
-		lc.z = lc.z.With(zap.Any(known.XUserIDKey, userID))
+		lc.z = lc.z.With(zap.Any(known.XUserIDKey, user.ID))
+
+		lc.z = lc.z.With(zap.Any(known.XUsernameKey, user.Username))
 	}
 
-	if username := ctx.Value(known.XUsernameKey); username != nil {
-		lc.z = lc.z.With(zap.Any(known.XUsernameKey, username))
-	}
+	// if userID := ctx.Value(known.XUserIDKey); userID != nil {
+	// 	lc.z = lc.z.With(zap.Any(known.XUserIDKey, userID))
+	// }
+
+	// if username := ctx.Value(known.XUsernameKey); username != nil {
+	// 	lc.z = lc.z.With(zap.Any(known.XUsernameKey, username))
+	// }
 
 	return lc
 }

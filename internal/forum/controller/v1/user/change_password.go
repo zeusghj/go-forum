@@ -3,8 +3,8 @@ package user
 import (
 	"go-forum/internal/pkg/core"
 	"go-forum/internal/pkg/errno"
-	"go-forum/internal/pkg/known"
 	"go-forum/internal/pkg/log"
+	"go-forum/internal/pkg/model"
 	v1 "go-forum/pkg/api/forum/v1"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +14,8 @@ import (
 func (ctrl *UserController) ChangePassword(c *gin.Context) {
 	log.C(c).Infow("ChangePassword function called")
 
-	userID := c.Value(known.XUserIDKey).(uint)
+	// userID := c.Value(known.XUserIDKey).(uint)
+	user := c.MustGet("user").(model.UserM) // 我的理解是经过了认证中间件这里一定是有值的
 
 	var r v1.ChangePasswordRequest
 	if err := c.ShouldBindJSON(&r); err != nil {
@@ -23,7 +24,7 @@ func (ctrl *UserController) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	if err := ctrl.b.Users().ChangePassword(c, userID, &r); err != nil {
+	if err := ctrl.b.Users().ChangePassword(c, user.ID, &r); err != nil {
 		core.WriteResponse(c, err, nil)
 
 		return

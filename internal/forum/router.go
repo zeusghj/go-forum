@@ -7,6 +7,7 @@ import (
 	"go-forum/internal/pkg/core"
 	"go-forum/internal/pkg/errno"
 	"go-forum/internal/pkg/log"
+	"go-forum/pkg/auth"
 
 	mw "go-forum/internal/pkg/middleware"
 
@@ -27,7 +28,12 @@ func installRouters(g *gin.Engine) error {
 		core.WriteResponse(c, nil, map[string]string{"status": "ok"})
 	})
 
-	uc := user.New(store.S)
+	authz, err := auth.NewAuthz(store.S.DB())
+	if err != nil {
+		return err
+	}
+
+	uc := user.New(store.S, authz)
 	pc := post.New(store.S)
 
 	// 注册

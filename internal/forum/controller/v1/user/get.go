@@ -3,7 +3,7 @@ package user
 import (
 	"go-forum/internal/pkg/core"
 	"go-forum/internal/pkg/errno"
-	"go-forum/internal/pkg/known"
+	"go-forum/internal/pkg/model"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -16,8 +16,9 @@ func (ctrl *UserController) GetUser(c *gin.Context) {
 
 	if idStr == "" {
 		// 如果没传 id，说明是获取自己的信息
-		userID, _ := c.Value(known.XUserIDKey).(uint)
-		user, err := ctrl.b.Users().GetUser(c, userID)
+		userM := c.MustGet("user").(model.UserM) // 我的理解是经过了认证中间件这里一定是有值的
+		// userID, _ := c.Value(known.XUserIDKey).(uint)
+		user, err := ctrl.b.Users().GetUser(c, userM.ID)
 		if err != nil {
 			core.WriteResponse(c, errno.ErrUserNotFound, nil)
 			return

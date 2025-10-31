@@ -15,18 +15,19 @@ type Config struct {
 	key         string
 	userIdKey   string
 	usernameKey string
+	roleKey     string
 }
 
 // ErrMissingHeader 表示 `Authorization` 请求头为空.
 var ErrMissingHeader = errors.New("the length of the `Authorization` header is zero")
 
 var (
-	config = Config{"Rtg8BPKNEf2mB4mgvKONGPZZQSaJWNLijxR42qRgq0iBb5", "userIdKey", "usernameKey"}
+	config = Config{"Rtg8BPKNEf2mB4mgvKONGPZZQSaJWNLijxR42qRgq0iBb5", "userIdKey", "usernameKey", "roleKey"}
 	once   sync.Once
 )
 
 // Init 设置包级别的配置 config, config 会用于本包后面的 token 签发和解析.
-func Init(key string, idKey string, usernameKey string) {
+func Init(key string, idKey string, usernameKey string, roleKey string) {
 	once.Do(func() {
 		if key != "" {
 			config.key = key
@@ -37,11 +38,14 @@ func Init(key string, idKey string, usernameKey string) {
 		if usernameKey != "" {
 			config.usernameKey = usernameKey
 		}
+		if roleKey != "" {
+			config.roleKey = roleKey
+		}
 	})
 }
 
 // Parse 使用指定的密钥 key 解析 token，解析成功返回 token 上下文，否则报错.
-func Parse(tokenString string, key string) (uint, string, error) {
+func Parse(tokenString string, key string) (uint, string, string, error) {
 	// 解析 token
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (any, error) {
 		// 确保 token 加密算法是预期的加密算法
@@ -54,11 +58,12 @@ func Parse(tokenString string, key string) (uint, string, error) {
 
 	// 解析失败
 	if err != nil {
-		return 0, "", err
+		return 0, "", "", err
 	}
 
 	var userID uint
 	var username string
+	var role string
 	// 如果解析成功，从token 中取出 token 的主题
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		// username 可能存在
@@ -75,17 +80,24 @@ func Parse(tokenString string, key string) (uint, string, error) {
 				userID = uint(f)
 			}
 		}
+
+		// role 可能不存在 （旧token）
+		if val, exists := claims[config.roleKey]; exists {
+			if s, ok := val.(string); ok {
+				role = s
+			}
+		}
 	}
 
-	return userID, username, nil
+	return userID, username, role, nil
 }
 
 // ParseRequest 从请求头中获取令牌，并将其传递给 Parse 函数以解析令牌.
-func ParseRequest(c *gin.Context) (uint, string, error) {
+func ParseRequest(c *gin.Context) (uint, string, string, error) {
 	header := c.Request.Header.Get("Authorization")
 
 	if len(header) == 0 {
-		return 0, "", ErrMissingHeader
+		return 0, "", "", ErrMissingHeader
 	}
 
 	var t string
@@ -96,11 +108,12 @@ func ParseRequest(c *gin.Context) (uint, string, error) {
 }
 
 // Sign 使用 jwtSecret 签发 token，token 的 claims 中会存放传入的 subject.
-func Sign(userId uint, username string) (tokenString string, err error) {
+func Sign(userId uint, username string, role string) (tokenString string, err error) {
 	// Token 的内容
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		config.userIdKey:   userId,
 		config.usernameKey: username,
+		config.roleKey:     username,
 		"nbf":              time.Now().Unix(),
 		"iat":              time.Now().Unix(),
 		"exp":              time.Now().Add(100000 * time.Hour).Unix(),

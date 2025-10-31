@@ -2,6 +2,8 @@ package db
 
 import (
 	"fmt"
+	"go-forum/internal/pkg/log"
+	"go-forum/internal/pkg/model"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -58,6 +60,12 @@ func NewMySQL(opts *MySQLOptions) (*gorm.DB, error) {
 
 	// SetMaxIdleConns 设置空闲连接池的最大连接数
 	sqlDB.SetMaxIdleConns(opts.MaxIdleConnections)
+
+	// 数据库自动迁移
+	if err := db.AutoMigrate(&model.UserM{}, &model.PostM{}, &model.CommentM{}); err != nil {
+		log.Fatalw("自动迁移失败: ", err)
+		return nil, fmt.Errorf("auto migrate failed: %w", err)
+	}
 
 	return db, nil
 }

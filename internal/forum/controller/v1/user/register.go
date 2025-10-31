@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const defaultMethods = "(GET)|(POST)|(PUT)|(DELETE)"
+
 // Register 创建一个新的用户
 func (ctrl *UserController) Register(c *gin.Context) {
 	log.C(c).Infow("register function called")
@@ -21,6 +23,12 @@ func (ctrl *UserController) Register(c *gin.Context) {
 	}
 
 	if err := ctrl.b.Users().Create(c, &r); err != nil {
+		core.WriteResponse(c, err, nil)
+
+		return
+	}
+
+	if _, err := ctrl.a.AddNamedPolicy("p", r.Username, "/v1/user/profile", defaultMethods); err != nil {
 		core.WriteResponse(c, err, nil)
 
 		return

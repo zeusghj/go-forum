@@ -3,8 +3,8 @@ package post
 import (
 	"go-forum/internal/pkg/core"
 	"go-forum/internal/pkg/errno"
-	"go-forum/internal/pkg/known"
 	"go-forum/internal/pkg/log"
+	"go-forum/internal/pkg/model"
 	v1 "go-forum/pkg/api/forum/v1"
 
 	"github.com/gin-gonic/gin"
@@ -15,17 +15,18 @@ func (ctrl *PostController) Create(c *gin.Context) {
 	log.C(c).Infow("Post-Create function called")
 
 	// 从上下文获取 user_id （JWT中间件存的）
-	userIDValue, exists := c.Get(known.XUserIDKey)
-	if !exists {
-		core.WriteResponse(c, errno.ErrTokenInvalid, nil)
-		return
-	}
+	// userIDValue, exists := c.Get(known.XUserIDKey)
+	user := c.MustGet("user").(model.UserM) // 我的理解是经过了认证中间件这里一定是有值的
+	// if !exists {
+	// 	core.WriteResponse(c, errno.ErrTokenInvalid, nil)
+	// 	return
+	// }
 
-	userID, ok := userIDValue.(uint)
-	if !ok {
-		core.WriteResponse(c, errno.ErrTokenInvalid.SetMessage("用户ID解析失败"), nil)
-		return
-	}
+	// userID, ok := userIDValue.(uint)
+	// if !ok {
+	// 	core.WriteResponse(c, errno.ErrTokenInvalid.SetMessage("用户ID解析失败"), nil)
+	// 	return
+	// }
 
 	var r v1.CreatePostRequest
 	if err := c.ShouldBindJSON(&r); err != nil {
@@ -34,7 +35,7 @@ func (ctrl *PostController) Create(c *gin.Context) {
 		return
 	}
 
-	if err := ctrl.b.Posts().Create(c, userID, &r); err != nil {
+	if err := ctrl.b.Posts().Create(c, user.ID, &r); err != nil {
 		core.WriteResponse(c, err, nil)
 
 		return

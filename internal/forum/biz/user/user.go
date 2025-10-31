@@ -67,7 +67,7 @@ func (u *userBiz) Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginRespo
 	}
 
 	// 如果匹配成功，说明登录成功，签发 token 并返回
-	t, err := token.Sign(user.ID, user.Username)
+	t, err := token.Sign(user.ID, user.Username, user.Role)
 	if err != nil {
 		return nil, errno.ErrSignToken
 	}

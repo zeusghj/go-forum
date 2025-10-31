@@ -13,6 +13,7 @@ type UserM struct {
 	Nickname string `gorm:"size:30"`
 	Email    string `gorm:"size:256"`
 	Phone    string `gorm:"size:16"`
+	Role     string `gorm:"size:50;default:'user'"`
 }
 
 func (u *UserM) TableName() string {
