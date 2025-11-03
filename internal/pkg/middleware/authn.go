@@ -17,7 +17,7 @@ func Authn() gin.HandlerFunc {
 		// 解析 JWT Token 先获取token再从token取出username
 		userID, username, role, err := token.ParseRequest(ctx)
 
-		if err != nil || userID == 0 || role == "" {
+		if err != nil || userID == 0 {
 			core.WriteResponse(ctx, errno.ErrTokenInvalid, nil)
 			ctx.Abort()
 

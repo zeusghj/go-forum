@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const defaultMethods = "(GET)|(POST)|(PUT)|(DELETE)"
+// const defaultMethods = "(GET)|(POST)|(PUT)|(DELETE)"
 
 // Register 创建一个新的用户
 func (ctrl *UserController) Register(c *gin.Context) {
@@ -28,7 +28,25 @@ func (ctrl *UserController) Register(c *gin.Context) {
 		return
 	}
 
-	if _, err := ctrl.a.AddNamedPolicy("p", r.Username, "/v1/user/profile", defaultMethods); err != nil {
+	// if _, err := ctrl.a.AddNamedPolicy("p", r.Username, "/v1/user/profile", defaultMethods); err != nil {
+	// 	core.WriteResponse(c, err, nil)
+
+	// 	return
+	// }
+
+	role := "user"
+	if r.Username == "root" {
+		role = "admin"
+	}
+	// AddNamedPolicy 是用来添加 p策略（policy） 的方法，即 p, sub, obj, act 类型的规则。
+	// if _, err := ctrl.a.AddNamedPolicy("g", r.Username, role); err != nil {
+	// 	core.WriteResponse(c, err, nil)
+
+	// 	return
+	// }
+
+	// AddNamedGroupingPolicy 某个用户属于某个角色
+	if _, err := ctrl.a.AddNamedGroupingPolicy("g", r.Username, role); err != nil {
 		core.WriteResponse(c, err, nil)
 
 		return

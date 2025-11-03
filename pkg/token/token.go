@@ -113,10 +113,10 @@ func Sign(userId uint, username string, role string) (tokenString string, err er
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		config.userIdKey:   userId,
 		config.usernameKey: username,
-		config.roleKey:     username,
-		"nbf":              time.Now().Unix(),
-		"iat":              time.Now().Unix(),
-		"exp":              time.Now().Add(100000 * time.Hour).Unix(),
+		// config.roleKey:     role,
+		"nbf": time.Now().Unix(),
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(100000 * time.Hour).Unix(),
 	})
 	// 签发 token
 	tokenString, err = token.SignedString([]byte(config.key))

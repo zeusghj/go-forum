@@ -45,6 +45,7 @@ func installRouters(g *gin.Engine) error {
 	v1 := g.Group("/v1")
 	{
 		// 创建 user 路由分组
+		// userv1 := v1.Group("/user", mw.Authn(), mw.Authz(authz)) // 这里只为测试RBAC 暂无业务
 		userv1 := v1.Group("/user", mw.Authn())
 		{
 			userv1.GET("", uc.GetUser)                         // 获取指定用户名的用户详情

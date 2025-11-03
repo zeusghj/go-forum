@@ -29,8 +29,8 @@ func Authz(a Auther) gin.HandlerFunc {
 
 		fmt.Print("sub = ", user.Role)
 
-		log.Debugw("Build authorize context", "sub", user.Role, "obj", obj, "act", act)
-		if allowed, _ := a.Authorize(user.Role, obj, act); !allowed {
+		log.Debugw("Build authorize context", "sub", user.Username, "obj", obj, "act", act)
+		if allowed, _ := a.Authorize(user.Username, obj, act); !allowed {
 			core.WriteResponse(ctx, errno.ErrUnauthorized, nil)
 			ctx.Abort()
 			return

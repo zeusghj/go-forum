@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/casbin/casbin/v2"
@@ -27,6 +28,8 @@ func NewAuthz(db *gorm.DB) (*Authz, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("加载策略文件成功")
 
 	// load the policy from DB.
 	if err := enforcer.LoadPolicy(); err != nil {
