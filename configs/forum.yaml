@@ -15,6 +15,12 @@ db:
   max-connection-life-time: 10s # 空闲连接最大存活时间，默认 10s
   log-level: 4 # GORM log level, 1: silent, 2:error, 3:warn, 4:info
 
+# HTTPS 服务器相关配置
+tls:
+  addr: :8445 # HTTPS 服务器监听地址
+  cert: ./_output/cert/server.crt # 服务端证书文件
+  key: ./_output/cert/server.key # 服务端私钥文件
+
 # 日志配置
 log:
   disable-caller: false
